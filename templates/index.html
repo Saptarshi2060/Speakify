@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speakify</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Speakify</h1>
+        <form id="text-to-speech-form">
+            <textarea name="text" id="text" placeholder="Enter text here"></textarea>
+            <button type="submit">Convert to Speech</button>
+        </form>
+        <button id="clear-btn">Clear</button>
+        <audio id="audio-player" controls style="display:none;">
+            <source id="audio-source" src="" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+    </div>
+
+    <script>
+        document.getElementById("text-to-speech-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            fetch("/convert", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const audioPlayer = document.getElementById("audio-player");
+                    const audioSource = document.getElementById("audio-source");
+                    audioSource.src = data.audio_url;
+                    audioPlayer.style.display = "block";
+                    audioPlayer.load();
+                    audioPlayer.play();
+                }
+            });
+        });
+
+        document.getElementById("clear-btn").addEventListener("click", function() {
+            document.getElementById("text").value = "";
+            document.getElementById("audio-player").style.display = "none";
+        });
+    </script>
+</body>
+</html>
